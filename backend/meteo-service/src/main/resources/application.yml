@@ -1,0 +1,57 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: meteo-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/meteo_db
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # Configuration RabbitMQ
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  # Configuration Spring Cloud Stream avec RabbitMQ
+  cloud:
+    stream:
+      bindings:
+        meteoConditions-out-0:
+          destination: meteo-conditions-topic
+          content-type: application/json
+      rabbit:
+        bindings:
+          meteoConditions-out-0:
+            producer:
+              exchange-type: topic
+
+# Configuration Eureka Client
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+# Configuration Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

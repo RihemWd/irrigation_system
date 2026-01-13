@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: meteo-config
+data:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://meteo-db:3306/meteo_db"
+  SPRING_RABBITMQ_HOST: "rabbitmq"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meteo-service
+  labels:
+    app: meteo-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meteo-service
+  template:
+    metadata:
+      labels:
+        app: meteo-service
+    spec:
+      containers:
+      - name: meteo-service
+        image: irrigation/meteo-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: meteo-config
+              key: SPRING_DATASOURCE_URL
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "root"
+        - name: SPRING_RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: meteo-config
+              key: SPRING_RABBITMQ_HOST
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: meteo-config
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: meteo-service
+spec:
+  selector:
+    app: meteo-service
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meteo-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meteo-db
+  template:
+    metadata:
+      labels:
+        app: meteo-db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_DATABASE
+          value: "meteo_db"
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        volumeMounts:
+        - name: meteo-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: meteo-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: meteo-db
+spec:
+  selector:
+    app: meteo-db
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+  type: ClusterIP
