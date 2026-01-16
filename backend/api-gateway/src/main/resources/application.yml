@@ -7,27 +7,18 @@ spring:
 
   cloud:
     gateway:
-      mvc:
-        routes:
-          # Route pour le service Météo
-          - id: meteo-service
-            uri: lb://meteo-service
-            predicates:
-              - Path=/api/meteo/**
-            filters:
-              - name: CircuitBreaker
-                args:
-                  name: meteoCircuitBreaker
+      routes:
+        # Route pour le service Météo
+        - id: meteo-service
+          uri: lb://meteo-service
+          predicates:
+            - Path=/api/meteo/**
 
-          # Route pour le service Arrosage
-          - id: arrosage-service
-            uri: lb://arrosage-service
-            predicates:
-              - Path=/api/arrosage/**
-            filters:
-              - name: CircuitBreaker
-                args:
-                  name: arrosageCircuitBreaker
+        # Route pour le service Arrosage
+        - id: arrosage-service
+          uri: lb://arrosage-service
+          predicates:
+            - Path=/api/arrosage/**
 
 # Configuration Eureka Client
 eureka:
@@ -51,16 +42,3 @@ management:
     health:
       show-details: always
 
-# Configuration CORS
-spring.cloud.gateway.globalcors:
-  cors-configurations:
-    '[/**]':
-      allowedOrigins: "http://localhost:4200"
-      allowedMethods:
-        - GET
-        - POST
-        - PUT
-        - DELETE
-        - OPTIONS
-      allowedHeaders: "*"
-      allowCredentials: true
