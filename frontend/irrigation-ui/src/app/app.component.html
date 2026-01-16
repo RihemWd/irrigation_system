@@ -1,0 +1,31 @@
+<div class="container">
+  <h1>🌱 {{ title }}</h1>
+  
+  <div class="nav-tabs">
+    <button 
+      [class.active]="activeTab === 'stations'" 
+      (click)="setActiveTab('stations')">
+      🌍 Stations Météo
+    </button>
+    <button 
+      [class.active]="activeTab === 'previsions'" 
+      (click)="setActiveTab('previsions')">
+      🌤️ Prévisions
+    </button>
+    <button 
+      [class.active]="activeTab === 'programmes'" 
+      (click)="setActiveTab('programmes')">
+      💧 Programmes d'Arrosage
+    </button>
+    <button 
+      [class.active]="activeTab === 'journaux'" 
+      (click)="setActiveTab('journaux')">
+      📋 Journal d'Exécution
+    </button>
+  </div>
+
+  <app-stations *ngIf="activeTab === 'stations'"></app-stations>
+  <app-previsions *ngIf="activeTab === 'previsions'"></app-previsions>
+  <app-programmes *ngIf="activeTab === 'programmes'"></app-programmes>
+  <app-journaux *ngIf="activeTab === 'journaux'"></app-journaux>
+</div>

@@ -1,0 +1,51 @@
+<div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>📋 Journal d'Exécution</h2>
+    <button class="btn btn-primary" (click)="loadJournaux()">
+      🔄 Actualiser
+    </button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <!-- Liste des journaux -->
+  <div *ngIf="loading" class="loading">
+    Chargement des journaux d'exécution
+  </div>
+
+  <div *ngIf="!loading && journaux.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Programme</th>
+          <th>Date d'Exécution</th>
+          <th>Volume Réel (L)</th>
+          <th>Type</th>
+          <th>Remarque</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let journal of journaux">
+          <td><strong>#{{ journal.id }}</strong></td>
+          <td>Programme #{{ journal.programmeId }}</td>
+          <td>{{ formatDate(journal.dateExecution) }}</td>
+          <td><strong>{{ journal.volumeReel }} L</strong></td>
+          <td>
+            <span class="badge" [ngClass]="getTypeExecutionBadgeClass(journal.typeExecution)">
+              {{ journal.typeExecution }}
+            </span>
+          </td>
+          <td>{{ journal.remarque || 'Aucune remarque' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && journaux.length === 0" style="text-align: center; padding: 40px; color: #999;">
+    <p style="font-size: 18px;">Aucune exécution enregistrée.</p>
+    <p>Les journaux apparaîtront ici après l'exécution des programmes d'arrosage.</p>
+  </div>
+</div>

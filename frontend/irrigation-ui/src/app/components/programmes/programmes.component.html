@@ -1,0 +1,137 @@
+<div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>💧 Programmes d'Arrosage</h2>
+    <button class="btn btn-primary" (click)="toggleForm()">
+      {{ showForm ? '❌ Annuler' : '➕ Nouveau Programme' }}
+    </button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    {{ success }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <!-- Formulaire de création -->
+  <div class="card" *ngIf="showForm">
+    <h3>Nouveau Programme d'Arrosage</h3>
+    <form (ngSubmit)="createProgramme()">
+      <div class="form-group">
+        <label for="dateDebut">Date de Début *</label>
+        <input 
+          type="date" 
+          id="dateDebut" 
+          [(ngModel)]="newProgramme.dateDebut" 
+          name="dateDebut" 
+          required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label for="heure">Heure (0-23) *</label>
+          <input 
+            type="number" 
+            id="heure" 
+            [(ngModel)]="newProgramme.heure" 
+            name="heure" 
+            min="0" 
+            max="23" 
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="duree">Durée (minutes) *</label>
+          <input 
+            type="number" 
+            id="duree" 
+            [(ngModel)]="newProgramme.duree" 
+            name="duree" 
+            min="1" 
+            required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="volumeEau">Volume d'Eau (Litres) *</label>
+        <input 
+          type="number" 
+          id="volumeEau" 
+          [(ngModel)]="newProgramme.volumeEau" 
+          name="volumeEau" 
+          min="1" 
+          step="0.1" 
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="etatPrevuInitial">État Initial *</label>
+        <select id="etatPrevuInitial" [(ngModel)]="newProgramme.etatPrevuInitial" name="etatPrevuInitial" required>
+          <option value="PLANIFIE">PLANIFIE</option>
+          <option value="AJUSTE">AJUSTE</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+        <input 
+          type="checkbox" 
+          id="useMeteo" 
+          [(ngModel)]="useMeteo" 
+          name="useMeteo">
+        <label for="useMeteo" style="margin: 0;">🌤️ Utiliser les données météo pour ajuster automatiquement</label>
+      </div>
+
+      <div class="form-group" *ngIf="useMeteo && stations.length > 0">
+        <label for="stationMeteoId">Station Météo</label>
+        <select id="stationMeteoId" [(ngModel)]="newProgramme.stationMeteoId" name="stationMeteoId">
+          <option *ngFor="let station of stations" [value]="station.id">
+            {{ station.nom }}
+          </option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-success" [disabled]="loading">
+        {{ loading ? 'Création...' : '✅ Créer le Programme' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Liste des programmes -->
+  <div *ngIf="loading && !showForm" class="loading">
+    Chargement des programmes
+  </div>
+
+  <div class="grid" *ngIf="!loading && programmes.length > 0">
+    <div class="card" *ngFor="let programme of programmes">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3>💧 Programme #{{ programme.id }}</h3>
+        <span class="badge" [ngClass]="getStatutBadgeClass(programme.etatPrevuInitial)">
+          {{ programme.etatPrevuInitial }}
+        </span>
+      </div>
+      <p><strong>📅 Date:</strong> {{ programme.dateDebut }} à {{ programme.heure }}h</p>
+      <p><strong>⏱️ Durée:</strong> {{ programme.duree }} minutes</p>
+      <p><strong>💧 Volume:</strong> {{ programme.volumeEau }} L</p>
+      <div *ngIf="programme.temperatureMax">
+        <p><strong>🌡️ Température Max:</strong> {{ programme.temperatureMax }}°C</p>
+        <p><strong>🌡️ Température Min:</strong> {{ programme.temperatureMin }}°C</p>
+        <p><strong>🌧️ Pluie:</strong> {{ programme.pluiePrevue ? 'Oui' : 'Non' }}</p>
+        <p><strong>💨 Vent:</strong> {{ programme.vent }} km/h</p>
+      </div>
+      <div style="margin-top: 15px; display: flex; gap: 10px;">
+        <button class="btn btn-success" (click)="executerProgramme(programme.id!)">
+          ▶️ Exécuter
+        </button>
+        <button class="btn btn-danger" (click)="deleteProgramme(programme.id!)">
+          🗑️ Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && programmes.length === 0 && !showForm" style="text-align: center; padding: 40px; color: #999;">
+    <p style="font-size: 18px;">Aucun programme d'arrosage enregistré.</p>
+    <p>Cliquez sur "Nouveau Programme" pour en créer un.</p>
+  </div>
+</div>

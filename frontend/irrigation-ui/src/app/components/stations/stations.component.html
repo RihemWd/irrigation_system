@@ -1,0 +1,98 @@
+<div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>🌍 Stations Météo</h2>
+    <button class="btn btn-primary" (click)="toggleForm()">
+      {{ showForm ? '❌ Annuler' : '➕ Nouvelle Station' }}
+    </button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    {{ success }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <!-- Formulaire de création -->
+  <div class="card" *ngIf="showForm">
+    <h3>Nouvelle Station Météo</h3>
+    <form (ngSubmit)="createStation()">
+      <div class="form-group">
+        <label for="nom">Nom de la station *</label>
+        <input 
+          type="text" 
+          id="nom" 
+          [(ngModel)]="newStation.nom" 
+          name="nom" 
+          required 
+          placeholder="Ex: Station Paris Centre">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label for="latitude">Latitude *</label>
+          <input 
+            type="number" 
+            id="latitude" 
+            [(ngModel)]="newStation.latitude" 
+            name="latitude" 
+            step="0.0001" 
+            required 
+            placeholder="Ex: 48.8566">
+        </div>
+
+        <div class="form-group">
+          <label for="longitude">Longitude *</label>
+          <input 
+            type="number" 
+            id="longitude" 
+            [(ngModel)]="newStation.longitude" 
+            name="longitude" 
+            step="0.0001" 
+            required 
+            placeholder="Ex: 2.3522">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="fournisseur">Fournisseur *</label>
+        <input 
+          type="text" 
+          id="fournisseur" 
+          [(ngModel)]="newStation.fournisseur" 
+          name="fournisseur" 
+          required 
+          placeholder="Ex: MeteoFrance">
+      </div>
+
+      <button type="submit" class="btn btn-success" [disabled]="loading">
+        {{ loading ? 'Création...' : '✅ Créer la Station' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Liste des stations -->
+  <div *ngIf="loading && !showForm" class="loading">
+    Chargement des stations
+  </div>
+
+  <div class="grid" *ngIf="!loading && stations.length > 0">
+    <div class="card" *ngFor="let station of stations">
+      <h3>🌍 {{ station.nom }}</h3>
+      <p><strong>ID:</strong> {{ station.id }}</p>
+      <p><strong>📍 Position:</strong> {{ station.latitude }}, {{ station.longitude }}</p>
+      <p><strong>🏢 Fournisseur:</strong> {{ station.fournisseur }}</p>
+      <div style="margin-top: 15px;">
+        <button class="btn btn-danger" (click)="deleteStation(station.id!, station.nom)">
+          🗑️ Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && stations.length === 0 && !showForm" style="text-align: center; padding: 40px; color: #999;">
+    <p style="font-size: 18px;">Aucune station météo enregistrée.</p>
+    <p>Cliquez sur "Nouvelle Station" pour en créer une.</p>
+  </div>
+</div>

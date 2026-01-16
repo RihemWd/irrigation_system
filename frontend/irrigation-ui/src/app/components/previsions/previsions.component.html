@@ -1,0 +1,137 @@
+<div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>🌤️ Prévisions Météo</h2>
+    <button class="btn btn-primary" (click)="toggleForm()" [disabled]="stations.length === 0">
+      {{ showForm ? '❌ Annuler' : '➕ Nouvelle Prévision' }}
+    </button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">
+    {{ success }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="alert alert-error" *ngIf="stations.length === 0 && !loading">
+    ⚠️ Aucune station disponible. Veuillez d'abord créer une station météo.
+  </div>
+
+  <!-- Formulaire de création -->
+  <div class="card" *ngIf="showForm && stations.length > 0">
+    <h3>Nouvelle Prévision Météo</h3>
+    <form (ngSubmit)="createPrevision()">
+      <div class="form-group">
+        <label for="stationId">Station Météo *</label>
+        <select id="stationId" [(ngModel)]="newPrevision.stationId" name="stationId" required>
+          <option *ngFor="let station of stations" [value]="station.id">
+            {{ station.nom }} ({{ station.latitude }}, {{ station.longitude }})
+          </option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label for="dateDebut">Date Début *</label>
+          <input 
+            type="date" 
+            id="dateDebut" 
+            [(ngModel)]="newPrevision.dateDebut" 
+            name="dateDebut" 
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="dateFin">Date Fin *</label>
+          <input 
+            type="date" 
+            id="dateFin" 
+            [(ngModel)]="newPrevision.dateFin" 
+            name="dateFin" 
+            required>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label for="temperatureMax">Température Max (°C) *</label>
+          <input 
+            type="number" 
+            id="temperatureMax" 
+            [(ngModel)]="newPrevision.temperatureMax" 
+            name="temperatureMax" 
+            step="0.1" 
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="temperatureMin">Température Min (°C) *</label>
+          <input 
+            type="number" 
+            id="temperatureMin" 
+            [(ngModel)]="newPrevision.temperatureMin" 
+            name="temperatureMin" 
+            step="0.1" 
+            required>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label for="pluiePrevue">Pluie Prévue (mm) *</label>
+          <input 
+            type="number" 
+            id="pluiePrevue" 
+            [(ngModel)]="newPrevision.pluiePrevue" 
+            name="pluiePrevue" 
+            step="0.1" 
+            min="0" 
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="vent">Vent (km/h) *</label>
+          <input 
+            type="number" 
+            id="vent" 
+            [(ngModel)]="newPrevision.vent" 
+            name="vent" 
+            step="1" 
+            min="0" 
+            required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success" [disabled]="loading">
+        {{ loading ? 'Création...' : '✅ Créer la Prévision (+ Event RabbitMQ)' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Liste des prévisions -->
+  <div *ngIf="loading && !showForm" class="loading">
+    Chargement des prévisions
+  </div>
+
+  <div class="grid" *ngIf="!loading && previsions.length > 0">
+    <div class="card" *ngFor="let prevision of previsions">
+      <h3>🌤️ Prévision #{{ prevision.id }}</h3>
+      <p><strong>📅 Période:</strong> {{ prevision.dateDebut }} → {{ prevision.dateFin }}</p>
+      <p><strong>🌡️ Températures:</strong> {{ prevision.temperatureMin }}°C ~ {{ prevision.temperatureMax }}°C</p>
+      <p><strong>🌧️ Pluie:</strong> {{ prevision.pluiePrevue }} mm</p>
+      <p><strong>💨 Vent:</strong> {{ prevision.vent }} km/h</p>
+      <p *ngIf="prevision.stationId"><strong>📍 Station:</strong> {{ getStationName(prevision.stationId) }}</p>
+      <div style="margin-top: 15px;">
+        <button class="btn btn-danger" (click)="deletePrevision(prevision.id!)">
+          🗑️ Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && previsions.length === 0 && !showForm" style="text-align: center; padding: 40px; color: #999;">
+    <p style="font-size: 18px;">Aucune prévision enregistrée.</p>
+    <p>Cliquez sur "Nouvelle Prévision" pour en créer une.</p>
+  </div>
+</div>

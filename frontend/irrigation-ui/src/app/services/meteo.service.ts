@@ -12,10 +12,13 @@ export interface Station {
 
 export interface Prevision {
   id?: number;
-  date: string;
+  stationId?: number;
+  dateDebut?: string;
+  dateFin?: string;
+  date?: string;
   temperatureMax: number;
   temperatureMin: number;
-  pluiePrevue: boolean;
+  pluiePrevue: number;
   vent: number;
   station?: Station;
 }
@@ -24,7 +27,7 @@ export interface Prevision {
   providedIn: 'root'
 })
 export class MeteoService {
-  private apiUrl = 'http://localhost:8080/api/meteo';
+  private apiUrl = '/api/meteo';
 
   constructor(private http: HttpClient) {}
 
@@ -62,7 +65,18 @@ export class MeteoService {
   }
 
   createPrevision(prevision: Prevision): Observable<Prevision> {
-    return this.http.post<Prevision>(`${this.apiUrl}/previsions`, prevision);
+    // Transformer les données du frontend au format du backend
+    const backendPayload = {
+      date: prevision.dateDebut, // Utiliser dateDebut comme date
+      temperatureMax: prevision.temperatureMax,
+      temperatureMin: prevision.temperatureMin,
+      pluiePrevue: prevision.pluiePrevue,
+      vent: prevision.vent,
+      station: {
+        id: prevision.stationId // Créer un objet station avec juste l'id
+      }
+    };
+    return this.http.post<Prevision>(`${this.apiUrl}/previsions`, backendPayload);
   }
 
   updatePrevision(id: number, prevision: Prevision): Observable<Prevision> {

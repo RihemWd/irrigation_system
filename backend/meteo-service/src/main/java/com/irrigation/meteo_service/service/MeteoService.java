@@ -45,6 +45,14 @@ public class MeteoService {
 
     @Transactional
     public Prevision createPrevision(Prevision prevision) {
+        // Récupérer la station complète par son ID
+        if (prevision.getStation() != null && prevision.getStation().getId() != null) {
+            StationMeteo station = getStationById(prevision.getStation().getId());
+            prevision.setStation(station);
+        } else {
+            throw new RuntimeException("Station ID est requis pour créer une prévision");
+        }
+        
         Prevision savedPrevision = previsionRepository.save(prevision);
         
         // Publier un événement pour les changements de conditions
@@ -61,7 +69,12 @@ public class MeteoService {
         existingPrevision.setTemperatureMin(prevision.getTemperatureMin());
         existingPrevision.setPluiePrevue(prevision.getPluiePrevue());
         existingPrevision.setVent(prevision.getVent());
-        existingPrevision.setStation(prevision.getStation());
+        
+        // Mettre à jour la station si fournie
+        if (prevision.getStation() != null && prevision.getStation().getId() != null) {
+            StationMeteo station = getStationById(prevision.getStation().getId());
+            existingPrevision.setStation(station);
+        }
         
         Prevision updatedPrevision = previsionRepository.save(existingPrevision);
         

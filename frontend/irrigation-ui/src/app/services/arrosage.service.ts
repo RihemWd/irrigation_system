@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 
 export interface ProgrammeArrosage {
   id?: number;
-  parcelleId: number;
-  datePlanifiee: string;
+  dateDebut: string;
+  heure: number;
   duree: number;
-  volumePrevu: number;
-  statut: string;
+  volumeEau: number;
+  etatPrevuInitial: string;
   temperatureMax?: number;
   temperatureMin?: number;
   pluiePrevue?: boolean;
@@ -29,7 +29,7 @@ export interface JournalArrosage {
   providedIn: 'root'
 })
 export class ArrosageService {
-  private apiUrl = 'http://localhost:8080/api/arrosage';
+  private apiUrl = '/api/arrosage';
 
   constructor(private http: HttpClient) {}
 
